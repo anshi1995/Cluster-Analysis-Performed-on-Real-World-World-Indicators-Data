@@ -1,0 +1,591 @@
+---
+title: "Project1 IE5374 - Group5"
+author: "Group-5 Anshita Aishwarya, Shrutika Swamy"
+date: "11/24/2021"
+output: pdf_document
+---
+
+## Data 1
+
+```{r Data1}
+
+library(factoextra)
+library(plot3D)
+library(plotly)
+library(ClusterR)
+library(cluster)
+library(plot3D)
+
+#Reading data
+Data1 <- read.csv("Data1.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data1 <- cbind(Data1[,1], as.data.frame(scale(Data1[,2:4])), Data1[,5])
+colnames(Data1) <- c("X", "X1", "X2", "X3", "Class")
+
+#Task 1.1 : K-Means Clustering of Data1
+#Determining optimal number of clusters
+fviz_nbclust(Data1[,2:4], kmeans, method = "wss")
+fviz_nbclust(Data1[,2:4], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=6
+km_Data1 <- kmeans(Data1[,2:4], 6, nstart=25)
+Data1$Class_kmeans <- km_Data1$cluster
+clusplot(Data1, km_Data1$cluster, main = "Data1 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data1 <- hclust(dist(Data1), method = "average")
+summary(hc_Data1)
+plot(hc_Data1, main="Cluster dendogram of Data1")
+hcm_Data1 <- cutree(hc_Data1, k = 7)
+Data1$Class_hier <- hcm_Data1
+plot(hcm_Data1, main = "Data1 - Cluster solution by Hierarchical")
+
+View(Data1)
+
+#Task 1.2 : 
+ext_Data1_kmeans <- external_validation(Data1$Class, km_Data1$cluster, method = "adjusted_rand_index")
+ext_Data1_hier <- external_validation(Data1$Class, hcm_Data1, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data1_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data1_hier))
+print(paste0("Observation: Hierarchical is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data1, x = ~X1, y = ~X2, z = ~X3, color = ~Class) %>% 
+  layout(title = "Data1 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+fviz_cluster(km_Data1, data = Data1, main = "2D - Data1 Clustering using K-Means Method")
+plot_ly(Data1, x = ~X1, y = ~X2, z = ~X3, color = ~Class_hier) %>% 
+  layout(title = "3D - Data1 Clustering using Hierarchical Method")
+
+```
+
+## Data 2
+
+```{r Task 1.1 - Data2}
+
+library(factoextra)
+
+#Reading data
+Data2 <- read.csv("Data2.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data2 <- cbind(Data2[,1], as.data.frame(scale(Data2[,2:4])), Data2[,5])
+colnames(Data2) <- c("X.1", "X", "Y", "C", "Class")
+
+#Task 1.1 : K-Means Clustering of Data2
+#Determining optimal number of clusters
+fviz_nbclust(Data2[,2:4], kmeans, method = "wss")
+fviz_nbclust(Data2[,2:4], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=4
+km_Data2 <- kmeans(Data2[,2:4], 4, nstart=25)
+Data2$Class_kmeans <- km_Data2$cluster
+clusplot(Data2, km_Data2$cluster, main="Data2 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data2 <- hclust(dist(Data2), method = "average")
+summary(hc_Data2)
+plot(hc_Data2, main="Cluster dendogram of Data2")
+hcm_Data2 <- cutree(hc_Data2, k = 4)
+Data2$Class_hier <- hcm_Data2
+plot(hcm_Data2, main="Data2 - Cluster solution by Hierarchical")
+
+View(Data2)
+
+#Task 1.2 : 
+ext_Data2_kmeans <- external_validation(Data2$Class, km_Data2$cluster, method = "adjusted_rand_index")
+ext_Data2_hier <- external_validation(Data2$Class, hcm_Data2, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data2_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data2_hier))
+print(paste0("Observation: Hierarchical is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data2, x = ~X, y = ~Y, z = ~C, color = ~Class) %>% 
+  layout(title = "Data2 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+scatter3D(Data2$X,Data2$Y,Data2$C,col=Data2$Class_kmeans,main="2D - Data2 Clustering using K-Means Method")
+plot_ly(Data8, x = ~X1, y = ~X2, z = ~X3, color = ~Class_hier) %>% 
+  layout(title = "3D - Data8 Clustering using Hierarchical Method")
+
+
+```
+
+## Data 3
+
+```{r Task 1.1 - Data3}
+
+#Reading data
+Data3 <- read.csv("Data3.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data3 <- cbind(Data3[,1], as.data.frame(scale(Data3[,2:4])), Data3[,5])
+colnames(Data3) <- c("X", "X1", "X2", "X3", "Class")
+
+#Task 1.1 : K-Means Clustering of Data3
+#Determining optimal number of clusters
+fviz_nbclust(Data3[,2:4], kmeans, method = "wss")
+fviz_nbclust(Data3[,2:4], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=4
+km_Data3 <- kmeans(Data3[,2:4], 4, nstart=25)
+Data3$Class_kmeans <- km_Data3$cluster
+clusplot(Data3, km_Data3$cluster, main="Data3 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data3 <- hclust(dist(Data3), method = "average")
+summary(hc_Data3)
+plot(hc_Data3, main="Cluster dendogram of Data3")
+hcm_Data3 <- cutree(hc_Data3, k = 3)
+Data3$Class_hier <- hcm_Data3
+plot(hcm_Data3, main="Data3 - Cluster solution by Hierarchical")
+
+View(Data3)
+
+#Task 1.2 : 
+ext_Data3_kmeans <- external_validation(Data3$Class, km_Data3$cluster, method = "adjusted_rand_index")
+ext_Data3_hier <- external_validation(Data3$Class, hcm_Data3, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data3_kmeans))
+
+#Validation  by Rand Index- Rand index is the ratio of the number of data pairs found in the same cluster added with the number of data pairs found in different clusters, to the total number of pairs
+
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data3_hier))
+print(paste0("Observation: K-Means is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data3, x = ~X1, y = ~X2, z = ~X3, color = ~Class) %>% 
+  layout(title = "Data3 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+fviz_cluster(km_Data3, data = Data3, main = "2D - Data3 Clustering using K-Means Method")
+plot_ly(Data3, x = ~X1, y = ~X2, z = ~X3, color = ~Class_hier) %>% 
+  layout(title = "3D - Data3 Clustering using Hierarchical Method")
+
+```
+
+## Data 4
+
+```{r Task 1.1 - Data4}
+
+#Reading data
+Data4 <- read.csv("Data4.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data4 <- cbind(Data4[,1], as.data.frame(scale(Data4[,2:4])), Data4[,5])
+colnames(Data4) <- c("X", "X1", "X2", "X3", "Class")
+
+#Task 1.1 : K-Means Clustering of Data4
+#Determining optimal number of clusters
+fviz_nbclust(Data4[,2:4], kmeans, method = "wss")
+fviz_nbclust(Data4[,2:4], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=10
+km_Data4 <- kmeans(Data4[,2:4], 10, nstart=25)
+Data4$Class_kmeans <- km_Data4$cluster
+clusplot(Data4, km_Data4$cluster, main="Data4 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data4 <- hclust(dist(Data4), method = "average")
+summary(hc_Data4)
+plot(hc_Data4, main="Cluster dendogram of Data4")
+hcm_Data4 <- cutree(hc_Data4, k = 3)
+Data4$Class_hier <- hcm_Data4
+plot(hcm_Data4, main="Data4 - Cluster solution by Hierarchical")
+
+View(Data4)
+
+#Task 1.2 : 
+ext_Data4_kmeans <- external_validation(Data4$Class, km_Data4$cluster, method = "adjusted_rand_index")
+ext_Data4_hier <- external_validation(Data4$Class, hcm_Data4, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data4_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data4_hier))
+print(paste0("Observation: Hierarchical is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data4, x = ~X1, y = ~X2, z = ~X3, color = ~Class) %>% 
+  layout(title = "Data4 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+fviz_cluster(km_Data4, data = Data4, main = "2D - Data4 Clustering using K-Means Method")
+plot_ly(Data4, x = ~X1, y = ~X2, z = ~X3, color = ~Class_hier) %>% 
+  layout(title = "3D - Data4 Clustering using Hierarchical Method")
+
+```
+
+## Data 5
+
+```{r Task 1.1 - Data5}
+
+#Reading data
+Data5 <- read.csv("Data5.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data5 <- cbind(Data5[,1], as.data.frame(scale(Data5[,2:4])), Data5[,5])
+colnames(Data5) <- c("X", "X1", "X2", "X3", "Class")
+
+#Task 1.1 : K-Means Clustering of Data1
+#Determining optimal number of clusters
+fviz_nbclust(Data5[,2:4], kmeans, method = "wss")
+fviz_nbclust(Data5[,2:4], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=10
+km_Data5 <- kmeans(Data5[,2:4], 10, nstart=25)
+Data5$Class_kmeans <- km_Data5$cluster
+clusplot(Data5, km_Data5$cluster, main="Data5 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data5 <- hclust(dist(Data5), method = "average")
+summary(hc_Data5)
+plot(hc_Data5, main="Cluster dendogram of Data5")
+hcm_Data5 <- cutree(hc_Data5, k = 2)
+Data5$Class_hier <- hcm_Data5
+plot(hcm_Data5, main="Data5 - Cluster solution by Hierarchical")
+
+View(Data5)
+
+#Task 1.2 : 
+ext_Data5_kmeans <- external_validation(Data5$Class, km_Data5$cluster, method = "adjusted_rand_index")
+ext_Data5_hier <- external_validation(Data5$Class, hcm_Data5, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data5_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data5_hier))
+print(paste0("Observation: Hierarchical is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data5, x = ~X1, y = ~X2, z = ~X3, color = ~Class) %>% 
+  layout(title = "Data5 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+fviz_cluster(km_Data5, data = Data5, main = "2D - Data5 Clustering using K-Means Method")
+plot_ly(Data5, x = ~X1, y = ~X2, z = ~X3, color = ~Class_hier) %>% 
+  layout(title = "3D - Data5 Clustering using Hierarchical Method")
+```
+
+## Data 6
+
+```{r Task 1.1 - Data6}
+
+#Reading data
+Data6 <- read.csv("Data6.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data6 <- cbind(Data6[,1], as.data.frame(scale(Data6[,2:3])), Data6[,4])
+colnames(Data6) <- c("X", "X1", "X2", "Class")
+
+#Task 1.1 : K-Means Clustering of Data6
+#Determining optimal number of clusters
+fviz_nbclust(Data6[,2:3], kmeans, method = "wss")
+fviz_nbclust(Data6[,2:3], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=6
+km_Data6 <- kmeans(Data6[,2:3], 3, nstart=25)
+Data6$Class_kmeans <- km_Data6$cluster
+clusplot(Data6, km_Data6$cluster, main="Data6 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data6 <- hclust(dist(Data6), method = "average")
+summary(hc_Data6)
+plot(hc_Data6, main="Cluster dendogram of Data6")
+hcm_Data6 <- cutree(hc_Data6, k = 3)
+Data6$Class_hier <- hcm_Data6
+plot(hcm_Data6, main="Data6 - Cluster solution by Hierarchical")
+
+View(Data6)
+
+#Task 1.2 : 
+ext_Data6_kmeans <- external_validation(Data6$Class, km_Data6$cluster, method = "adjusted_rand_index")
+ext_Data6_hier <- external_validation(Data6$Class, hcm_Data6, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data6_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data6_hier))
+print(paste0("Observation: K-Means is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data6, x = ~X1, y = ~X2, color = ~Class) %>% 
+  layout(title = "Data6 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+fviz_cluster(km_Data6, data = Data6, main = "2D - Data6 Clustering using K-Means Method")
+plot_ly(Data6, x = ~X1, y = ~X2, color = ~Class_hier) %>% 
+  layout(title = "3D - Data6 Clustering using Hierarchical Method")
+
+```
+
+## Data 7
+
+```{r Task 1.1 - Data7}
+
+#Reading data
+Data7 <- read.csv("Data7.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data7 <- cbind(Data7[,1], as.data.frame(scale(Data7[,2:3])), Data7[,4])
+colnames(Data7) <- c("X", "X1", "X2", "Class")
+
+#Task 1.1 : K-Means Clustering of Data7
+#Determining optimal number of clusters
+fviz_nbclust(Data7[,2:3], kmeans, method = "wss")
+fviz_nbclust(Data7[,2:3], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=6
+km_Data7 <- kmeans(Data7[,2:3], 6, nstart=25)
+Data7$Class_kmeans <- km_Data7$cluster
+clusplot(Data7, km_Data7$cluster, main="Data7 - Cluster solution by K-Means",
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data7 <- hclust(dist(Data7), method = "average")
+summary(hc_Data7)
+plot(hc_Data7, main="Cluster dendogram of Data1")
+hcm_Data7 <- cutree(hc_Data7, k = 4)
+Data7$Class_hier <- hcm_Data7
+plot(hcm_Data7, main="Data7 - Cluster solution by Hierarchical")
+
+View(Data7)
+
+#Task 1.2 : 
+ext_Data7_kmeans <- external_validation(Data7$Class, km_Data7$cluster, method = "adjusted_rand_index")
+ext_Data7_hier <- external_validation(Data7$Class, hcm_Data7, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data7_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data7_hier))
+print(paste0("Observation: K-Means is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data7, x = ~X1, y = ~X2, color = ~Class) %>% 
+  layout(title = "Data7 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+fviz_cluster(km_Data7, data = Data7, main = "2D - Data7 Clustering using K-Means Method")
+plot_ly(Data7, x = ~X1, y = ~X2, color = ~Class_hier) %>% 
+  layout(title = "3D - Data7 Clustering using Hierarchical Method")
+
+```
+
+## Data 8
+
+```{r Task 1.1 - Data8}
+
+#Reading data
+Data8 <- read.csv("Data8.csv")
+
+#Scaling the data only for the required columns and binding it with original class column
+Data8 <- cbind(Data8[,1], as.data.frame(scale(Data8[,2:4])), Data8[,5])
+colnames(Data8) <- c("X", "X1", "X2", "X3", "Class")
+
+#Task 1.1 : K-Means Clustering of Data8
+#Determining optimal number of clusters
+fviz_nbclust(Data8[,2:4], kmeans, method = "wss")
+fviz_nbclust(Data8[,2:4], kmeans, method = "silhouette")
+
+#K-Means Clustering using k=6
+km_Data8 <- kmeans(Data8[,2:4], 8, nstart=25)
+Data8$Class_kmeans <- km_Data8$cluster
+
+#Task 1.1 : Hierarchical Clustering
+hc_Data8 <- hclust(dist(Data8), method = "average")
+summary(hc_Data8)
+plot(hc_Data8, main="Cluster dendogram of Data8")
+hcm_Data8 <- cutree(hc_Data8, k = 4)
+Data8$Class_hier <- hcm_Data8
+plot(hcm_Data8, main="Data8 - Cluster solution by Hierarchical")
+
+View(Data8)
+
+#Task 1.2 : 
+ext_Data8_kmeans <- external_validation(Data8$Class, km_Data8$cluster, method = "adjusted_rand_index")
+ext_Data8_hier <- external_validation(Data8$Class, hcm_Data8, method = "adjusted_rand_index")
+print(paste0("External validation of K-Means by Adjusted Rand Index is ", ext_Data8_kmeans))
+print(paste0("External validation of Hierarchical by Adjusted Rand Index is ", ext_Data8_hier))
+print(paste0("Observation: K-Means and Hierarchicial gives 0 value for the above data by adjusted Rand Index, so for better evaluation we are using Jaccard index "))
+
+#Validation by Jaccard Index- Jaccard index is the ratio of number of data pairs found in the same cluster to the total number of data pairs.
+
+ext_Data8_kmeans1 <- external_validation(Data8$Class, km_Data8$cluster, method = "jaccard_index")
+ext_Data8_hier1 <- external_validation(Data8$Class, hcm_Data8, method = "jaccard_index")
+print(paste0("External validation of K-Means by Jaccard Index is ", ext_Data8_kmeans1))
+print(paste0("External validation of Hierarchical by Jaccard Index is ", ext_Data8_hier1))
+print(paste0("Observation: Hierarchical is more efficient method of clustering for this dataset"))
+
+#Task 1.3 : Plot data points based on original class
+plot_ly(Data8, x = ~X1, y = ~X2, z = ~X3, color = ~Class) %>% 
+  layout(title = "Data8 Clustering using Original Class")
+
+#Task 1.4 : Plot data points based on class allocated by clustering
+scatter3D(Data8$X1,Data8$X2,Data8$X3,col=Data8$Class_kmeans,main="2D - Data8 Clustering using K-Means Method")
+plot_ly(Data8, x = ~X1, y = ~X2, z = ~X3, color = ~Class_hier) %>% 
+  layout(title = "3D - Data8 Clustering using Hierarchical Method")
+
+
+```
+
+## Task 2: World Indicators - Data Prep and Cleaning
+
+```{r Data Prep and Cleaning}
+
+#Reading of data 
+world_indicator <- read.csv("World Indicators.csv")
+
+#Labeling the different rows with the country names
+rownames(world_indicator) <- world_indicator$Country
+
+#Removing dollar sign, percent symbols and commas
+world_indicator$GDP = as.numeric(gsub("[\\$,]", "", world_indicator$GDP))
+world_indicator$Health.Exp.Capita = as.numeric(gsub("[\\$,]", "", world_indicator$Health.Exp.Capita))
+world_indicator$Business.Tax.Rate = as.numeric(gsub("[\\%,]", "", world_indicator$Business.Tax.Rate))
+
+#Dropping the non numerical columns
+newdf <- world_indicator[, 1:18]
+
+#Dropping the columns that have more than 70 NA values
+newdf<- newdf[ , colSums(is.na(newdf)) < 70]
+
+#Removing the non-significant columns
+newdf <- newdf[, -c(2,3,7,9,12,13)]
+
+#Omitting the rows with NA values
+newdf <- na.omit(newdf)
+
+#Scaling of data
+newdf <- as.data.frame(scale(newdf))
+
+```
+
+## Task 2.1: K-Means Clustering
+
+```{r K-Means Clustering}
+
+library(factoextra)
+library(cluster)
+
+#Elbow method: Determining optimal number of clusters
+fviz_nbclust(newdf, kmeans, method = "wss")
+fviz_nbclust(newdf, kmeans, method = "silhouette")
+
+print(paste0("All the methods above report k=2 as the optimal number of clusters"))
+
+#Using k-means clustering with k=2
+km_world_indi <- kmeans(newdf, 2, nstart=20)
+km_world_indi$cluster
+summary(km_world_indi)
+
+#K-means clustering of World Indicator data
+clusplot(newdf, km_world_indi$cluster, main='2D representation of the Cluster solution',
+         color=TRUE, shade=TRUE, labels=1, lines=1)
+
+```
+
+## Task 2.1: Hierarchical Clustering
+
+```{r Hierarchical Clustering}
+
+hc_world_indi <- hclust(dist (newdf), method = "average")
+summary(hc_world_indi)
+plot(hc_world_indi,main="Clustered Dendogram of World Indicator Data")
+
+#Using k=6
+hcm_world_indi <- cutree(hc_world_indi, k = 3)
+plot(hcm_world_indi, main="Solution by Hierarchical Clustering of World Indicator ")
+
+```
+
+## Task 2.2: Internal Validation
+
+```{r Internal Validation}
+library(clValid)
+
+validate <- clValid(newdf, nClust = 2:6, clMethods = c("kmeans", "hierarchical"), validation ="internal")
+summary(validate)
+
+#Validation measure 1 - Connectivity
+print(paste0("For a particular clustering partition C = {C1,...,CK} of the N observations into K disjoint clusters, the connectivity is defined as summation of x(i) (i ranging from 1 to N, total number of observations) multiplied with summation of nn(i,j)
+(for i ranging from 1 to N and j ranging from 1 to L, parameter giving the number of nearest neighbors to use.Based on the different internal validation measures, the  connectivity has a value between zero and ∞ and should be minimized."))
+
+#Validation measure 2- Silhouette Width
+print(paste0("The Silhouette Width is the average of each observation’s Silhouette value. For observation i, it is defined as the ratio of 
+(bi − ai) and maximum value of (bi, ai), where ai is the average distance between i and all other observations in the same cluster, and bi is the average distance between i and the observations in the nearest neighboring cluster.Silhouette Width lies in the interval [−1, 1] and should be maximized. "))
+
+#Validation measure 3- Dunn Index
+print(paste0("The Dunn Index is the ratio of the smallest distance between observations not in the same cluster to the largest intra-cluster distance.Dunn Index has a value between zero and ∞ and should be maximized for determining better cluster quality."))
+
+print(paste0("Thus it is evident from the calculated validation measures that hierarchical clustering has a better cluster quality as compared to k-means"))
+
+```
+
+## Task 2.3: Comparing clustering solutions and grouping countries based on clustering methods
+
+```{r Comparing clustering solutions}
+
+#Comparing clustering solutions
+print(paste0("It has been depicted in the previous question based on the calculated validation measures that hierarchical clustering has a better cluster quality as compared to k-means"))
+
+#Grouping the list of the countries clustered via k-means
+listofcluster_kmeans = order(km_world_indi$cluster)
+grouped_countries_kmeans <- data.frame(km_world_indi$cluster[listofcluster_kmeans])
+View(grouped_countries_kmeans)
+
+#Grouping the list of the countries clustered via hierarchical
+listofcluster_hier = order(hcm_world_indi)
+grouped_countries_hier <- data.frame(hcm_world_indi[listofcluster_hier])
+View(grouped_countries_hier)
+
+```
+
+## Task 2.4: Data Plotting
+
+```{r Data Plotting}
+library(ggplot2)
+library(ggpubr)
+library(plot3D)
+library(plotly)
+
+#Scatter Plot 1: Infant Mortality Rate v/s GDP (using k-means clustering)
+newdf_scatter1 <- world_indicator[,c(5,9)]
+newdf_scatter1 <- na.omit(newdf_scatter1)
+newdf_scatter1_scaled <- as.data.frame(scale(newdf_scatter1))
+
+fviz_nbclust(newdf_scatter1_scaled, kmeans, method = "silhouette")
+km_scatter1 <- kmeans(newdf_scatter1_scaled, 2, nstart=20)
+km_scatter1$cluster
+summary(km_scatter1)
+
+plot(newdf_scatter1$Infant.Mortality.Rate, newdf_scatter1$GDP, 
+     main = "Infant Mortality Rate v/s GDP", xlab = "Infant Mortality Rate", ylab = "GDP", 
+     col = km_scatter1$cluster, pch = 19, frame = FALSE)
+
+#Scatter Plot 2: Urban Population v/s Energy Usage (using k-means clustering)
+newdf_scatter2 <- world_indicator[,c(4,18)]
+newdf_scatter2 <- na.omit(newdf_scatter2)
+newdf_scatter2_scaled <- as.data.frame(scale(newdf_scatter2))
+
+fviz_nbclust(newdf_scatter2_scaled, kmeans, method = "silhouette")
+km_scatter2 <- kmeans(newdf_scatter2_scaled, 10, nstart=20)
+km_scatter2$cluster
+summary(km_scatter2)
+
+plot_ly(newdf_scatter2, x = ~Population.Urban, y = ~Energy.Usage, color = ~km_scatter2$cluster) %>% 
+  layout(title = "Urban Population v/s Energy Usage")
+
+#Scatter Plot 3: Population 15-64 years v/s Internet Usage (using hierarchical clustering)
+newdf_scatter3 <- world_indicator[,c(10,16)]
+newdf_scatter3 <- na.omit(newdf_scatter3)
+newdf_scatter3_scaled <- as.data.frame(scale(newdf_scatter3))
+
+hc_scatter3 <- hclust(dist (newdf_scatter3_scaled), method = "average")
+summary(hc_scatter3)
+plot(hc_scatter3)
+
+#Using k=4
+hcm_scatter3 <- cutree(hc_scatter3, k = 4)
+plot(hcm_scatter3)
+newdf_scatter3$Class_hier <- hcm_scatter3
+
+plot_ly(newdf_scatter3, x = ~Population.15.64, y = ~Internet.Usage, color= ~newdf_scatter3$Class_hier) %>% 
+  layout(title = "Population 15-64 years v/s Internet Usage")
+
+```
