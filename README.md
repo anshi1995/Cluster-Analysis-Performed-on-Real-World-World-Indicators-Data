@@ -1,0 +1,2 @@
+# Cluster-Analysis-Performed-on-Real-World-World-Indicators-Data
+This project uses unsupervised clustering algorithms (K-means and Hierarchical) to obtain homogeneous classification of different countries based on various attributes such as GDP, Mortality Rate, Life Expectancy etc. The clustering results are visualized using dendrograms and scatter plots &amp; the performance of clustering quality is obtained using internal and external validation metrics.
