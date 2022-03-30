@@ -1,0 +1,204 @@
+---
+title: "Project1 - Group5"
+author: "Group-5 Anshita Aishwarya, Shrutika Swamy"
+date: "11/24/2021"
+output: pdf_document
+---
+
+## Importing the required libraries
+
+```{r Importing Libraries}
+library(dplyr)
+library(factoextra)
+library(cluster)
+library(clValid)
+library(ggplot2)
+library(ggpubr)
+# library(plot3D)
+library(plotly)
+```
+
+
+## World Indicators - Data Prep and Cleaning
+
+```{r Data Prep and Cleaning}
+
+# Reading of data 
+world_indicator <- read.csv("World Indicators.csv")
+
+# Labeling the different rows with the country names
+rownames(world_indicator) <- world_indicator$Country
+
+# Removing dollar sign, percent symbols and commas
+world_indicator$GDP = as.numeric(gsub("[\\$,]", "", world_indicator$GDP))
+world_indicator$Health.Exp.Capita = as.numeric(gsub("[\\$,]", "", world_indicator$Health.Exp.Capita))
+world_indicator$Business.Tax.Rate = as.numeric(gsub("[\\%,]", "", world_indicator$Business.Tax.Rate))
+
+# Dropping the non numerical columns
+newdf <- world_indicator[, 1:18]
+df_actual <- world_indicator
+
+# Dropping the columns that have more than 70 NA values
+newdf <- newdf[ , colSums(is.na(newdf)) < 70]
+
+# Removing the non-significant columns
+newdf <- newdf[, -c(2,3,7,9,12,13)]
+
+# Omitting the rows with NA values
+newdf <- na.omit(newdf)
+
+# Scaling of data
+newdf <- as.data.frame(scale(newdf))
+
+```
+
+## Performing K-Means Clustering
+
+```{r K-Means Clustering}
+# This clustering is obtained by considering all the attributes including birth rate, GDP, health expenditure, infant mortality rate, life expectancy (males and females) and population (different age groups)
+
+# Elbow method: Determining optimal number of clusters
+fviz_nbclust(newdf, kmeans, method = "wss")
+fviz_nbclust(newdf, kmeans, method = "silhouette")
+
+# All the methods above report k = 2 as the optimal number of clusters
+
+# Using k-means clustering with k=2
+km_world_indi <- kmeans(newdf, 2, nstart = 20)
+km_world_indi$cluster
+summary(km_world_indi)
+
+# K-means clustering of World Indicator data
+clusplot(newdf, km_world_indi$cluster, main = '2D representation of the Cluster solution',
+         color = TRUE, shade = TRUE, labels = 1, lines = 1)
+
+```
+
+## Performing Hierarchical Clustering
+
+```{r Hierarchical Clustering}
+
+# This clustering is obtained by considering all the attributes including birth rate, GDP, health expenditure, infant mortality rate, life expectancy (males and females) and population (different age groups)
+
+hc_world_indi <- hclust(dist (newdf), method = "average")
+summary(hc_world_indi)
+plot(hc_world_indi,main = "Clustered Dendogram of World Indicator Data")
+
+# Using k = 3
+hcm_world_indi <- cutree(hc_world_indi, k = 3)
+plot(hcm_world_indi, main = "Solution by Hierarchical Clustering of World Indicator")
+
+```
+
+## Performing Internal Validation Metrics to evaluate the performance of clustering
+
+1.) Connectivity - For a particular clustering partition C = {C1,...,CK} of the N observations into K disjoint clusters, the connectivity is defined as summation of x(i) (i ranging from 1 to N, total number of observations) multiplied with summation of nn(i,j)
+(for i ranging from 1 to N and j ranging from 1 to L, parameter giving the number of nearest neighbors to use. Based on the different internal validation measures, the  connectivity has a value between zero and ∞ and should be minimized.
+
+2.) Silhouette Width - The Silhouette Width is the average of each observation’s Silhouette value. For observation i, it is defined as the ratio of (bi − ai) and maximum value of (bi, ai), where ai is the average distance between i and all other observations in the same cluster, and bi is the average distance between i and the observations in the nearest neighboring cluster.Silhouette Width lies in the interval [−1, 1] and should be maximized.
+
+3.) Dunn Index - The Dunn Index is the ratio of the smallest distance between observations not in the same cluster to the largest intra-cluster distance.Dunn Index has a value between zero and ∞ and should be maximized for determining better cluster quality.
+
+```{r Internal Validation}
+# Since our data does not have labels, we cannot perform external validation
+
+int_validate <- clValid(newdf, nClust = 2:6, clMethods = c("kmeans", "hierarchical"),
+                    validation = "internal")
+summary(int_validate)
+
+print(paste0("Thus it is evident from these calculated validation measures that hierarchical clustering has a better cluster quality as compared to k-means"))
+
+```
+
+## Comparing clustering solutions and grouping countries based on clustering methods
+
+```{r Comparing clustering solutions}
+
+# Comparing clustering solutions
+
+# It has been depicted in the previous question based on the calculated validation measures that hierarchical clustering has a better cluster quality as compared to k-means"))
+
+# Grouping the list of the countries clustered via k-means
+listofcluster_kmeans = order(km_world_indi$cluster)
+grouped_countries_kmeans <- data.frame(kmeans_cluster = km_world_indi$cluster[listofcluster_kmeans])
+View(grouped_countries_kmeans)
+
+# Grouping the list of the countries clustered via hierarchical
+listofcluster_hier = order(hcm_world_indi)
+grouped_countries_hier <- data.frame(hierarchical_cluster = hcm_world_indi[listofcluster_hier])
+View(grouped_countries_hier)
+
+```
+
+## Data Plotting
+
+```{r Data Plotting}
+
+# This clustering is obtained considering 2 attributes - GDP and infant mortality rate
+# Scatter Plot 1: Infant Mortality Rate v/s GDP (using k-means clustering)
+newdf_scatter1 <- world_indicator[, c(5, 9)]
+newdf_scatter1 <- na.omit(newdf_scatter1)
+newdf_scatter1_scaled <- as.data.frame(scale(newdf_scatter1))
+
+fviz_nbclust(newdf_scatter1_scaled, kmeans, method = "silhouette")
+km_scatter1 <- kmeans(newdf_scatter1_scaled, 2, nstart = 20)
+km_scatter1$cluster
+summary(km_scatter1)
+
+plot(newdf_scatter1$Infant.Mortality.Rate, newdf_scatter1$GDP, 
+     main = "Infant Mortality Rate v/s GDP",
+     xlab = "Infant Mortality Rate",
+     ylab = "GDP", 
+     col = km_scatter1$cluster, pch = 19, frame = FALSE)
+
+# This clustering is obtained considering 2 attributes - Urban population and energy usage
+# Scatter Plot 2: Urban Population v/s Energy Usage (using k-means clustering)
+newdf_scatter2 <- world_indicator[,c(4,18)]
+newdf_scatter2 <- na.omit(newdf_scatter2)
+newdf_scatter2_scaled <- as.data.frame(scale(newdf_scatter2))
+
+fviz_nbclust(newdf_scatter2_scaled, kmeans, method = "silhouette")
+km_scatter2 <- kmeans(newdf_scatter2_scaled, 10, nstart = 20)
+km_scatter2$cluster
+summary(km_scatter2)
+
+plot_ly(newdf_scatter2,
+        x = ~Population.Urban,
+        y = ~Energy.Usage,
+        color = ~km_scatter2$cluster) %>% 
+  layout(title = "Urban Population v/s Energy Usage",
+         xaxis = list(title = "Urban Pouplation"),
+         yaxis = list(title = "Energy Usage"))
+
+# This clustering is obtained considering 2 attributes - Population 15-64 years and internet usage
+# Scatter Plot 3: Population 15-64 years v/s Internet Usage (using hierarchical clustering)
+newdf_scatter3 <- world_indicator[, c(10, 16)]
+newdf_scatter3 <- na.omit(newdf_scatter3)
+newdf_scatter3_scaled <- as.data.frame(scale(newdf_scatter3))
+
+hc_scatter3 <- hclust(dist (newdf_scatter3_scaled), method = "average")
+summary(hc_scatter3)
+plot(hc_scatter3)
+
+#Using k=4
+hcm_scatter3 <- cutree(hc_scatter3, k = 4)
+plot(hcm_scatter3)
+newdf_scatter3$Class_hier <- hcm_scatter3
+
+ggplot(newdf_scatter3, aes(x = Population.15.64, y = Internet.Usage, color = as.factor(Class_hier))) +
+  geom_point(stat = "identity") +
+  ggtitle("Population 15-64 years v/s Internet Usage") +
+  xlab("Pouplation 15-64 years") +
+  ylab("Internet Usage") +
+  labs(color = "Cluster")+
+  scale_colour_brewer(palette = "Set1") +
+  theme(plot.title = element_text(size = 13, face = "bold.italic", color = "black", hjust = 0.5),
+        axis.title.x = element_text(size = 7, face = "bold"),
+        axis.title.y = element_text(size = 7, face = "bold"),
+        axis.text.x = element_text(size = 5, angle = 0),
+        axis.text.y = element_text(size = 5, angle = 90),
+        legend.position = "right",
+        legend.title = element_text(size = 7, face = "bold"),
+        legend.text = element_text(size = 7, face = "bold"),
+        strip.text = element_text(size = 7))
+```
